@@ -1,0 +1,125 @@
+<template>
+  <view>
+    <!-- 空白购物车 -->
+    <view class="empty_cart" wx:if="{{isEmpty}}">
+      <image src="/assets/images/cart_empty@2x.png"></image>
+      <view>哎呀，购物车是空的</view>
+    </view>
+
+    <!-- 非空购物车 -->
+    <view class="cart-container" wx:else>
+      <!-- 购物车标题 -->
+      <van-cell title="购物车列表" icon="shop-o" />
+      <!-- 购物车商品 -->
+      <block wx:for="{{cart}}" wx:key="id">
+        <van-swipe-cell right-width="{{ 65 }}" left-width="{{ 0.1 }}">
+          <van-card  title="{{item.name}}" >
+            <!-- 自定义商品描述区插槽 -->
+            <view slot="desc" class="desc">
+              <!-- 价格 -->
+              <text class="price">￥{{item.price}}</text>
+              <!-- 数量 -->
+              <van-stepper value="{{item.count}}" bind:change="countChanged" data-id="{{item.id}}" />
+            </view>
+            <!-- 缩略图插槽 -->
+            <view slot="thumb" class="thumb">
+              <!-- 复选框 -->
+              <van-checkbox value="{{item.ischeck}}" checked-color="#d81e06" bind:change="statusChanged" data-id="{{item.id}}"></van-checkbox>
+              <!-- 缩略图 -->
+              <image src="{{item.pic}}"/>
+            </view>
+          </van-card>
+          <view slot="right" class="close" @tap="close({{item.id}})">删除</view>
+        </van-swipe-cell>
+      </block>
+      
+      <!-- 提交订单 -->
+      <van-submit-bar
+        price="{{ amount }}"
+        button-text="提交订单"
+        bind:submit="SubmitOrder" tip="{{false}}">
+        <!-- 全选反选的复选框 -->
+        <van-checkbox class="fullCheck" value="{{isFullChecked}}" check-color="#d81e06" bind:change="onFullCheckChanged">全选</van-checkbox>
+      </van-submit-bar>
+
+    </view>
+
+
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import mix from '@/mixins/tabs/cart.js'
+
+export default class extends wepy.page  {
+  mixins = [mix]
+}
+</script>
+
+<style lang="less">
+.empty_cart {
+  font-size: 26rpx;
+  color: #666;
+  text-align: center;
+  padding-top: 200rpx;
+  image {
+    width: 180rpx;
+    height: 180rpx;
+  }
+}
+
+.cart-container {
+  padding-bottom: 50px;
+}
+
+.desc {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  .price {
+    color: red;
+    font-weight: bold;
+    font-size: 12px;
+  }
+}
+
+.van-card {
+  border-bottom: 1rpx solid #eee;
+  padding-left: 7px !important;
+}
+
+.thumb {
+  display: flex;
+  align-items: center;
+  width: 118px;
+  image {
+    width: 90px;
+    height: 90px;
+    margin-left: 8px;
+  }
+}
+
+.van-card__thumb {
+  width: 118px !important;
+}
+
+.close {
+  background-color: #ff4444;
+  width: 65px;
+  height: 100%;
+  color: white;
+  font-size: 13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.fullCheck {
+  margin-left: 7px;
+}
+</style>
+

@@ -1,0 +1,41 @@
+<template>
+    <view>
+        <view class="sep_line"></view>
+        <van-panel title="{{'订单号：' + order.order_number}}">
+            <van-card num="2" price="100" title="今夏最潮最流行的帽子你值得拥有选择它你将是这条gai最靓的崽崽看好你喽" thumb="{{item.pic}}"/>
+            <van-card num="3" price="200" title="今夏最潮最流行的帽子你值得拥有选择它你将是这条gai最靓的崽崽看好你喽" thumb="{{item.pic}}"/>
+            <block wx:for="{{order.order_detail}}" wx:key="index">
+                <van-card num="{{order.count}}" price="{{order.price}}" title="{{order.name}}" thumb="{{order.pic}}"/>
+            </block>
+            <!-- 商品件数及金额 -->
+            <van-cell value="共{{order.total_count}}件商品，订单金额￥{{order.order_price}}" />
+        </van-panel>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class extends wepy.component {
+    data = {}
+
+    // 外界传递过来的数据
+    // wepy中的定义，使用props接受外界传递过来的值
+    // 外界通过属性传值
+    props = {
+        order: Object
+    }
+
+    methods = {}
+}
+</script>
+
+<style lang="less">
+.sep_line {
+    border-top: 15rpx solid #eee;
+}
+.van-card {
+    border-bottom: 1rpx solidd #eee;
+}
+</style>
+

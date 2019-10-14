@@ -1,0 +1,97 @@
+<template>
+    <view class="order_container">
+        <!-- 收货地址按钮 -->
+        <view class="choose_address_box" wx:if="{{isHaveAddress === false}}">
+            <van-button type="info" size="small" @tap="chooseAddress">+ 选择收货地址</van-button>
+            
+        </view>
+
+        <!-- 收货人信息 -->
+        <view class="address_box" wx:else>
+            <!-- 收货人 联系电话 -->
+            <view class="box1">
+                <text>收货人： {{addressInfo.userName}}</text>
+                <view @tap="chooseAddress">
+                    <text>联系方式：{{addressInfo.telNumber}}</text>
+                    <van-icon name="arrow" />
+                </view>
+            </view>
+            <!-- 收货地址 -->
+            <view class="box2">收货地址: {{addressStr}}</view>
+        </view>
+
+        <!-- 分割线 -->
+        <image src="/assets/images/cart_border@2x.png" class="sep_line"></image>
+
+        <!-- 商品列表 -->
+        <view class="goods_list">
+            <block wx:for="{{cart}}" wx:key="id">
+                <van-card num="{{item.count}}" price="{{item.price}}" title="{{item.name}}" thumb="{{item.pic}}" />
+            </block>
+        </view>
+
+        <!-- 登录后下单 -->
+        <!-- open-type="getUserInfo" bindgetuserinfo="getUserInfo" 属于微信组件button内容的参数定义 -->
+        <van-button type="primary" size="large" class="btnLogin" open-type="getUserInfo" bindgetuserinfo="getUserInfo" wx:if="{{islogin === false}}">登录后下单</van-button>
+
+        <!-- 订单支付区域 -->
+        <!-- 登录后可显示该区域 -->
+        <van-submit-bar price="{{amount}}" button-text="支付订单" bind:submit="onSubmit" wx:else></van-submit-bar>
+
+       
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import mix from '@/mixins/order.js'
+
+export default class extends wepy.page {
+    config = {
+        // 设置页面标题
+        navigationBarTitleText: '确认订单'
+    }
+    mixins = [mix]
+}
+</script>
+
+<style lang="less">
+.choose_address_box {
+    text-align: center;
+    padding: 60rpx 0;
+}
+
+.sep_line {
+    height: 7px;
+    width: 100%;
+    display: block;
+}
+
+.address_box {
+    font-size: 26rpx;
+    padding: 0 10rpx;
+    .box1 {
+        display: flex;
+        justify-content: space-between;
+        padding: 30rpx 0;
+    }
+    .box2 {
+        padding-bottom: 30rpx;
+    }
+}
+
+.van-card {
+    border-bottom: 1rpx solid #eee;
+}
+
+.btnLogin {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+.order_container {
+    padding-bottom: 50px;
+}
+</style>
+
+

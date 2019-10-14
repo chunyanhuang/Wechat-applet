@@ -1,0 +1,253 @@
+<style lang="less">
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+import '@/baseAPI.js'
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/tabs/home',
+      'pages/tabs/cates',
+      'pages/tabs/search',
+      'pages/tabs/cart',
+      'pages/tabs/me',
+      // 商品详情
+      'pages/goods_detail/main',
+      //商品列表
+      'pages/goods_list',
+      // 确认订单页面
+      'pages/order',
+      // 完成的订单列表
+      'pages/orderlist'
+    ],
+    window: {
+      backgroundTextStyle: 'dark',
+      navigationBarBackgroundColor: '#d81e06',
+      navigationBarTitleText: 'HCYShop',
+      navigationBarTextStyle: 'white'
+    },
+    tabBar: {
+      // 选中的文本颜色
+      selectedColor: '#d81e06',
+      // 所有tabs节点的配置
+      list: [
+        {
+          pagePath: 'pages/tabs/home',
+          text: '首页',
+          iconPath: '/assets/icons/home.png',
+          selectedIconPath: '/assets/icons/home-active.png'
+        },
+        {
+          pagePath: 'pages/tabs/cates',
+          text: '分类',
+          iconPath: '/assets/icons/cates.png',
+          selectedIconPath: '/assets/icons/cates-active.png'
+        },
+        {
+          pagePath: 'pages/tabs/search',
+          text: '搜索',
+          iconPath: '/assets/icons/search.png',
+          selectedIconPath: '/assets/icons/search-active.png'
+        },
+        {
+          pagePath: 'pages/tabs/cart',
+          text: '购物车',
+          iconPath: '/assets/icons/cart.png',
+          selectedIconPath: '/assets/icons/cart-active.png'
+        },
+        {
+          pagePath: 'pages/tabs/me',
+          text: '我的',
+          iconPath: '/assets/icons/my.png',
+          selectedIconPath: '/assets/icons/my-active.png'
+        }
+      ]
+    },
+    // 引入并注册组件
+    usingComponents: {
+      // 徽章组件
+      'van-badge': './assets/vant/badge/index',
+      'van-badge-group': './assets/vant/badge-group/index',
+      // 布局相关组件
+      'van-row': './assets/vant/row/index',
+      'van-col': './assets/vant/col/index',
+      // 全局注册搜索框组件
+      'van-search': './assets/vant/search/index',
+      // 单元格组件
+      'van-cell': './assets/vant/cell/index',
+      'van-cell-group': './assets/vant/cell-group/index',
+      // 图标
+      'van-icon': './assets/vant/icon/index',
+      // tag标签
+      'van-tag': './assets/vant/tag/index',
+      // 商品卡片
+      'van-card': './assets/vant/card/index',
+      // tab 标签页
+      'van-tab': './assets/vant/tab/index',
+      'van-tabs': './assets/vant/tabs/index',
+      // html代码转换成wxml代码的插件
+      wxparse: './assets/wxparse/wxparse',
+      // 商品导航
+      'van-goods-action': './assets/vant/goods-action/index',
+      'van-goods-action-icon':
+        './assets/vant/goods-action-icon/index',
+      'van-goods-action-button':
+        './assets/vant/goods-action-button/index',
+      // 商品数量
+       "van-stepper": "./assets/vant/stepper/index",
+       // 渲染复选框
+       "van-checkbox": "./assets/vant/checkbox/index",
+       // 滑动单元格组件
+        "van-swipe-cell": "./assets/vant/swipe-cell/index",
+      // 提交订单区
+      "van-submit-bar": "./assets/vant/submit-bar/index",
+      "van-button": "./assets/vant/button/index",
+      // 面板
+      "van-panel": "./assets/vant/panel/index"
+    }
+  }
+
+  // 全局共享数据，属于小程序本身的属性，在App中
+  // this.$parent.globalData
+  globalData = {
+    // 全局购物车列表
+    cart: [],
+    total: 0
+  }
+
+  // 加入购物车
+  addGoodsToCart(goods){
+    const i = this.globalData.cart.findIndex(x => x.id === goods.goods_id)
+    if(i !== -1) {
+      this.globalData.cart[i].count++
+      this.saveCartToStorage()
+      return
+    }
+    console.log(goods)
+    // 梳理商品信息
+    const info = {
+      id: goods.goods_id,
+      name: goods.goods_name,
+      pic: goods.goods_small_logo,
+      price: goods.goods_price,
+      count: 1,
+      ischeck: true
+    }
+    this.globalData.cart.push(info)
+    console.log(this.globalData.cart)
+    this.saveCartToStorage()
+
+  }
+
+  //更新购物车数量
+    updateGoodsCount(id, count){
+        const i = this.globalData.cart.findIndex(x=>x.id === id)
+        if(i !== -1) {
+        this.globalData.cart[i].count = count;
+        this.saveCartToStorage()
+        }
+    }
+  
+  // 更新购物车商品选中状态
+  updateGoodsStatus(id, status) {
+    const i = this.globalData.cart.findIndex(x=>x.id === id) ;
+    if(i !== -1) {
+      this.globalData.cart[i].ischeck = status;
+      this.saveCartToStorage()
+    }
+  }
+
+  // 根据id删除商品
+  removeGoodsById(id){
+    const i = this.globalData.cart.findIndex(x=>x.id===id)
+    if(i !== -1) {
+      this.globalData.cart.splice(i,1);
+      this.saveCartToStorage();
+    }
+  }
+
+  // 更新购物车的每件商品选中状态
+  updateAllGoodsStatus(status){
+    this.globalData.cart.forEach(x=>{
+      x.ischeck = status;
+    })
+    this.saveCartToStorage();
+  }
+
+  // 保存购物车数据到本地存储
+  saveCartToStorage() {
+    wepy.setStorageSync('cart', this.globalData.cart)
+    this.renderCartBadge()
+  }
+
+  // 渲染购物车角标
+  async renderCartBadge(){
+    // 计算已勾选的商品数量
+    let c = 0;
+    this.globalData.cart.forEach(x=>{
+      if(x.ischeck) {
+        c++;
+      }
+    })
+
+    // 更新全局的商品数量
+    this.globalData.total = c;
+
+    // 调研api,将勾选的商品数量渲染到指定的tabbar
+    const res = await wepy.setTabBarBadge({
+      index: 3,
+      text: c + ''
+    }).catch(err=>err)
+
+    // 设置tabbar徽章失败
+    if(res.errMsg !== 'setTabBarBadge:ok') {}
+
+  }
+
+  // es6构造器 书写构造函数
+  constructor() {
+    super()
+    this.use('requestfix')
+    // 为异步api开启promise功能，实现可书写async await 
+    this.use('promisify')
+
+    // 拦截器  属于wepy框架
+    this.intercept('request', {
+      // 发出请求时的回调函数
+      config(p) {
+        // 显示loading效果
+        wepy.showLoading({
+          title: '数据加载中...'
+        })
+
+        // 自定义请求头
+        p.header = {
+          Authorization: wepy.getStorageSync('token')
+        }
+
+        return p
+      },
+      success(p) {
+        return p
+      },
+      fail(p) {
+        return p
+      },
+      complete(p) {
+        // 隐藏loading效果
+        wepy.hideLoading()
+      }
+    })
+  }
+
+  // 应用初始化加载完
+  onLaunch() {
+    console.log('小程序启动啦')
+    this.globalData.cart = wepy.getStorageSync('cart') || [];
+    this.renderCartBadge()
+  }
+}
+</script>

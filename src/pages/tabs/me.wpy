@@ -1,0 +1,18 @@
+<template>
+  <view>
+    我的信息未完待续...
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class extends wepy.page  {
+  
+}
+</script>
+
+<style lang="less">
+
+</style>
+
